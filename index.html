@@ -1,0 +1,708 @@
+<!doctype html>
+<html lang="id" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Pressure Converter</title>
+    <meta
+      name="description"
+      content="Konverter tekanan PSI, Bar, dan KPa secara realtime."
+    />
+
+    <style>
+      /* ================================
+         THEME
+      ================================= */
+
+      :root {
+        color-scheme: dark;
+
+        --bg: #1d232a;
+        --surface: #191e24;
+        --surface-soft: #2a323c;
+        --text: #a6adbb;
+        --text-strong: #f2f2f2;
+        --muted: #737b88;
+        --border: #3b424c;
+        --primary: #7480ff;
+      }
+
+      [data-theme="light"] {
+        color-scheme: light;
+
+        --bg: #f2f2f2;
+        --surface: #ffffff;
+        --surface-soft: #e5e6e6;
+        --text: #1f2937;
+        --text-strong: #111827;
+        --muted: #6b7280;
+        --border: #d1d5db;
+        --primary: #5865f2;
+      }
+
+      /* ================================
+         RESET
+      ================================= */
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+      }
+
+      body {
+        font-family:
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+
+        background: var(--bg);
+        color: var(--text);
+
+        transition:
+          background-color 0.2s ease,
+          color 0.2s ease;
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      /* ================================
+         NAVBAR
+      ================================= */
+
+      .navbar {
+        width: 100%;
+        min-height: 4rem;
+
+        background: var(--surface);
+
+        box-shadow:
+          0 1px 3px rgb(0 0 0 / 0.12),
+          0 1px 2px rgb(0 0 0 / 0.08);
+      }
+
+      .container {
+        width: 100%;
+        margin-inline: auto;
+      }
+
+      .navbar > .container {
+        padding-inline: 1rem;
+      }
+
+      .navbar-content {
+        width: 100%;
+        min-height: 4rem;
+
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .brand {
+        display: inline-flex;
+        align-items: center;
+
+        padding: 0.5rem 0.75rem;
+
+        border-radius: 0.5rem;
+
+        font-size: 1.125rem;
+        font-weight: 600;
+
+        transition: background-color 0.2s ease;
+      }
+
+      .brand:hover {
+        background: var(--surface-soft);
+      }
+
+      /* ================================
+         THEME TOGGLE
+      ================================= */
+
+      .theme-toggle {
+        position: relative;
+
+        width: 2.75rem;
+        height: 2.75rem;
+
+        display: grid;
+        place-items: center;
+
+        border: 0;
+        border-radius: 999px;
+
+        background: transparent;
+        color: var(--text-strong);
+
+        cursor: pointer;
+
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      .theme-toggle:hover {
+        background: var(--surface-soft);
+      }
+
+      .theme-toggle svg {
+        width: 1.5rem;
+        height: 1.5rem;
+
+        fill: currentColor;
+
+        transition:
+          transform 0.2s ease,
+          opacity 0.2s ease;
+      }
+
+      .theme-toggle .moon {
+        display: none;
+      }
+
+      [data-theme="light"] .theme-toggle .sun {
+        display: none;
+      }
+
+      [data-theme="light"] .theme-toggle .moon {
+        display: block;
+      }
+
+      /* ================================
+         MAIN
+      ================================= */
+
+      main {
+        min-height: calc(100vh - 4rem);
+        padding-inline: 1rem;
+      }
+
+      .main-section {
+        width: 100%;
+        max-width: 64rem;
+
+        min-height: calc(100vh - 4rem);
+
+        margin-inline: auto;
+
+        display: flex;
+        align-items: center;
+      }
+
+      .converter-wrapper {
+        width: 100%;
+      }
+
+      /* ================================
+         TITLE
+      ================================= */
+
+      .title-section {
+        margin-bottom: 1.5rem;
+      }
+
+      .title-section h1 {
+        margin: 0;
+
+        color: var(--text-strong);
+
+        font-size: 1.5rem;
+        line-height: 2rem;
+        font-weight: 700;
+      }
+
+      .title-section p {
+        margin: 0.25rem 0 0;
+
+        color: var(--muted);
+
+        font-size: 0.875rem;
+      }
+
+      /* ================================
+         CARD
+      ================================= */
+
+      .card {
+        border-radius: 0.75rem;
+      }
+
+      .main-card {
+        background: var(--surface);
+
+        box-shadow:
+          0 4px 6px -1px rgb(0 0 0 / 0.1),
+          0 2px 4px -2px rgb(0 0 0 / 0.1);
+      }
+
+      .card-body {
+        padding: 1.5rem;
+      }
+
+      /* ================================
+         INPUT GRID
+      ================================= */
+
+      .input-grid {
+        display: grid;
+        gap: 1.5rem;
+      }
+
+      .form-control {
+        width: 100%;
+      }
+
+      .label {
+        display: flex;
+        align-items: center;
+
+        min-height: 2rem;
+
+        padding-block: 0.25rem;
+      }
+
+      .label-text {
+        color: var(--text);
+      }
+
+      .font-medium {
+        font-weight: 500;
+      }
+
+      .input {
+        width: 100%;
+        height: 3rem;
+
+        padding-inline: 0.75rem;
+
+        border: 1px solid var(--border);
+        border-radius: 0.5rem;
+
+        outline: none;
+
+        background: var(--bg);
+        color: var(--text-strong);
+
+        font: inherit;
+        font-size: 1rem;
+
+        transition:
+          border-color 0.2s ease,
+          box-shadow 0.2s ease,
+          background-color 0.2s ease;
+      }
+
+      .input::placeholder {
+        color: var(--muted);
+      }
+
+      .input:focus {
+        border-color: var(--primary);
+
+        box-shadow:
+          0 0 0 2px color-mix(
+            in srgb,
+            var(--primary) 25%,
+            transparent
+          );
+      }
+
+      /* ================================
+         DIVIDER
+      ================================= */
+
+      .divider {
+        display: flex;
+        align-items: center;
+
+        width: 100%;
+
+        margin-block: 1rem;
+
+        color: var(--muted);
+
+        font-size: 0.875rem;
+      }
+
+      .divider::before,
+      .divider::after {
+        content: "";
+
+        height: 1px;
+        flex: 1;
+
+        background: var(--border);
+      }
+
+      .divider::before {
+        margin-right: 1rem;
+      }
+
+      .divider::after {
+        margin-left: 1rem;
+      }
+
+      .divider a:hover {
+        color: var(--text-strong);
+      }
+
+      .font-mono {
+        font-family:
+          ui-monospace,
+          SFMono-Regular,
+          Menlo,
+          Monaco,
+          Consolas,
+          monospace;
+      }
+
+      .italic {
+        font-style: italic;
+      }
+
+      .description {
+        color: var(--muted);
+
+        text-align: center;
+
+        font-size: 0.875rem;
+      }
+
+      /* ================================
+         NUMBER INPUT
+      ================================= */
+
+      input[type="number"] {
+        appearance: textfield;
+      }
+
+      input[type="number"]::-webkit-inner-spin-button,
+      input[type="number"]::-webkit-outer-spin-button {
+        margin: 0;
+
+        appearance: none;
+      }
+
+      /* ================================
+         RESPONSIVE
+      ================================= */
+
+      @media (min-width: 768px) {
+        .input-grid {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 480px) {
+        .card-body {
+          padding: 1rem;
+        }
+
+        .title-section h1 {
+          font-size: 1.35rem;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <header class="navbar">
+      <div class="container">
+        <div class="navbar-content">
+          <a
+            href="https://github.com/RidwanXyZ"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="brand"
+          >
+            RidwanXyZ
+          </a>
+
+          <button
+            id="themeToggle"
+            class="theme-toggle"
+            type="button"
+            aria-label="Ganti tema"
+          >
+            <!-- Sun -->
+            <svg
+              class="sun"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+            >
+              <path
+                d="M5.64 17l-.71.71a1 1 0 001.41 1.41l.71-.71A1 1 0 005.64 17zM4 12a1 1 0 100-2H3a1 1 0 100 2h1zm8-8a1 1 0 00-1-1 1 1 0 00-1 1v1a1 1 0 002 0V4zm6.36 2.64a1 1 0 00-1.41-1.41l-.71.71a1 1 0 001.41 1.41l.71-.71zM20 10h-1a1 1 0 100 2h1a1 1 0 000-2zm-8 8a1 1 0 00-1 1v1a1 1 0 102 0v-1a1 1 0 00-1-1zm4.36-1.64a1 1 0 00-1.41 1.41l.71.71a1 1 0 001.41-1.41l-.71-.71zM12 7a5 5 0 100 10 5 5 0 000-10z"
+              />
+            </svg>
+
+            <!-- Moon -->
+            <svg
+              class="moon"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+            >
+              <path
+                d="M21.64 13.65A9 9 0 0110.35 2.36 9 9 0 1021.64 13.65z"
+              />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="main-section">
+        <div class="converter-wrapper">
+
+          <div class="title-section">
+            <h1>Pressure Converter</h1>
+
+            <p>
+              Konversi PSI, Bar, dan KPa secara realtime.
+            </p>
+          </div>
+
+          <div class="card main-card">
+            <div class="card-body">
+
+              <div class="input-grid">
+
+                <!-- PSI -->
+                <div class="form-control">
+                  <label class="label" for="psi">
+                    <span class="label-text font-medium">
+                      PSI
+                    </span>
+                  </label>
+
+                  <input
+                    id="psi"
+                    type="number"
+                    inputmode="decimal"
+                    step="any"
+                    min="0"
+                    class="input"
+                    placeholder="0"
+                    autocomplete="off"
+                  />
+                </div>
+
+                <!-- Bar -->
+                <div class="form-control">
+                  <label class="label" for="bar">
+                    <span class="label-text font-medium">
+                      Bar
+                    </span>
+                  </label>
+
+                  <input
+                    type="text"
+                    inputmode="decimal"
+                    id="bar"
+                    class="input"
+                    placeholder="0.00"
+                    autocomplete="off"
+                  />
+                </div>
+
+                <!-- KPa -->
+                <div class="form-control">
+                  <label class="label" for="kpa">
+                    <span class="label-text font-medium">
+                      KPa
+                    </span>
+                  </label>
+
+                  <input
+                    id="kpa"
+                    type="number"
+                    inputmode="decimal"
+                    step="any"
+                    min="0"
+                    class="input"
+                    placeholder="0"
+                    autocomplete="off"
+                  />
+                </div>
+
+              </div>
+
+              <div class="divider font-mono italic">
+                <a
+                  href="https://github.com/RidwanXyZ"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  By RidwanXyZ
+                </a>
+              </div>
+
+              <div class="description">
+                1 PSI = 0.0689476 Bar = 6.89476 KPa
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </section>
+    </main>
+
+    <script>
+      /* ================================
+         PRESSURE CONVERTER
+      ================================= */
+
+      const inputs = {
+        psi: document.getElementById("psi"),
+        bar: document.getElementById("bar"),
+        kpa: document.getElementById("kpa"),
+      };
+
+      /*
+       * Semua konversi menggunakan PSI
+       * sebagai base unit.
+       *
+       * 1 unit = berapa PSI
+       */
+
+      const UNIT_FACTOR = {
+        psi: 1,
+        bar: 14.5038,
+        kpa: 0.145038,
+      };
+
+      function parseNumber(value) {
+        return Number.parseFloat(
+          value.replace(",", ".")
+        );
+      }
+
+      function formatValue(value) {
+        return value.toFixed(2);
+      }
+
+      function clearInputs() {
+        Object.values(inputs).forEach((input) => {
+          input.value = "";
+        });
+      }
+
+      function convert(unit, value) {
+        /*
+         * Input → PSI
+         */
+        const psi = value * UNIT_FACTOR[unit];
+
+        /*
+         * PSI → semua unit
+         */
+        Object.entries(inputs).forEach(
+          ([targetUnit, input]) => {
+            if (targetUnit === unit) {
+              return;
+            }
+
+            input.value = formatValue(
+              psi / UNIT_FACTOR[targetUnit]
+            );
+          }
+        );
+      }
+
+      function handleInput(event) {
+        const input = event.target;
+        const unit = input.id;
+
+        const value = parseNumber(input.value);
+
+        if (
+          input.value.trim() === "" ||
+          Number.isNaN(value)
+        ) {
+          clearInputs();
+          return;
+        }
+
+        if (value < 0) {
+          input.value = "";
+          return;
+        }
+
+        convert(unit, value);
+      }
+
+      Object.values(inputs).forEach((input) => {
+        input.addEventListener(
+          "input",
+          handleInput
+        );
+      });
+
+      /* ================================
+         THEME
+      ================================= */
+
+      const themeToggle =
+        document.getElementById("themeToggle");
+
+      const savedTheme =
+        localStorage.getItem("pressure-theme");
+
+      if (savedTheme === "light" || savedTheme === "dark") {
+        document.documentElement.dataset.theme =
+          savedTheme;
+      }
+
+      function updateThemeIcon() {
+        const theme =
+          document.documentElement.dataset.theme;
+
+        themeToggle.setAttribute(
+          "aria-label",
+          theme === "dark"
+            ? "Aktifkan tema terang"
+            : "Aktifkan tema gelap"
+        );
+      }
+
+      themeToggle.addEventListener(
+        "click",
+        () => {
+          const currentTheme =
+            document.documentElement.dataset.theme;
+
+          const newTheme =
+            currentTheme === "dark"
+              ? "light"
+              : "dark";
+
+          document.documentElement.dataset.theme =
+            newTheme;
+
+          localStorage.setItem(
+            "pressure-theme",
+            newTheme
+          );
+
+          updateThemeIcon();
+        }
+      );
+
+      updateThemeIcon();
+    </script>
+  </body>
+</html>
